@@ -54,7 +54,7 @@ app.get('/about', (요청, 응답) => {
 //mongodb 라이브러리 설치. 터미널에서 npm install mongodb@5
 
 let db
-const url = 'mongodb+srv://admin:qwer1234@cluster0.dblcy1x.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+const url = 'mongodb+srv://id:pw@cluster0.dblcy1x.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
 new MongoClient(url).connect().then((client)=>{
   console.log('DB연결성공')
   db = client.db('forum')

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="/main.css" rel="stylesheet">
+</head>
+<body class="grey-bg">
+  <%- include('nav.ejs') %>
+  <!--form 태그에서 input 태그의 값을 전송할때는 input 태그안에 name 속성을 줘야 정상적으로 동작함.-->
+    <form class="form-box" action="/add" method="POST">
+        <h4>글쓰기</h4>
+        <input name="title">
+        <input name="content">
+        <button type="submit">전송</button>
+    </form> 
+  </div> 
+</body>
+</html>

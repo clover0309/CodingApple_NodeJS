@@ -1,9 +1,15 @@
 //express 라이브러리 사용.
 const express = require('express');
 const app = express();
+// mongodb 라이브러리 기본 셋업.
+const { MongoClient, MongoExpiredSessionError, ObjectId } = require('mongodb')
 
 app.use(express.static(__dirname + '/public'));
 app.set('view engine', 'ejs');
+
+// 2강 1장 설정.
+app.use(express.json());
+app.use(express.urlencoded({extended:true}));
 
 // 서버 띄우는 코드.
 // db사용하는 부분에 추가되어 있음.
@@ -46,9 +52,6 @@ app.get('/about', (요청, 응답) => {
 // 5강 데이터베이스를 서버와 연결하기.
 
 //mongodb 라이브러리 설치. 터미널에서 npm install mongodb@5
-
-// mongodb 라이브러리 기본 셋업.
-const { MongoClient } = require('mongodb')
 
 let db
 const url = 'mongodb+srv://admin:qwer1234@cluster0.dblcy1x.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
@@ -128,3 +131,74 @@ app.get('/time', async (요청, 응답) => {
     5. 서버기능을 만들때, 레이어를 걸쳐서 코드가 실행되도록 만들어도됨.
     6. 서버는 실행가능한 코드를 보내야함.
 */
+
+// ------------------------------------------------------------
+
+// Part2 1강 글 작성기능 만들기1
+
+app.get('/write', async (요청, 응답) => {
+    응답.render('write.ejs');
+});
+
+app.post('/add', async (요청, 응답) => {
+    console.log("call /add");
+    console.log(`보내는 값 : ${요청.body}`);
+
+    // 데이터를 전송할 때, 요청.body는 object형태로 보내짐으로, 키 : 요청.body.키 이런식으로 작성해줘야 한다.
+    //await db.collection('post').insertOne({title : 요청.body.title, content : 요청.body.content});
+    //성공시에 다른 페이지로 이동하게하려면 redirect 함수를 이용.
+    //응답.redirect('/list');
+
+    // Part2 2강 글 작성기능 만들기2 (공백 방지, 예외처리)
+    try {
+    if(요청.body.title == '') {
+        응답.send("제목을 입력하세요.");
+    } else if(요청.body.content == '') {
+        응답.send("내용을 입력하세요.");
+    } else {
+    // 데이터를 전송할 때, 요청.body는 object형태로 보내짐으로, 키 : 요청.body.키 이런식으로 작성해줘야 한다.
+    await db.collection('post').insertOne({title : 요청.body.title, content : 요청.body.content});
+    //성공시에 다른 페이지로 이동하게하려면 redirect 함수를 이용.
+    응답.redirect('/list');
+    }
+    } catch (e) {
+        // 에러메시지 출력.
+        console.log(e);
+        //500 에러일시. 서버에러 메시지 출력.
+        응답.status(500).send('서버에러.');
+    }
+});
+// ------------------------------------------------------------
+
+// Part2 3강 상세페이지 만들기 (URL Parameter)
+
+// /detail/아무글자 를 입력하게되면, 해당되는 파라미터 값을 받아서 글이 있는지 확인후에 페이지 출력해준다.
+app.get('/detail/:id', async (요청, 응답) => {
+    //사용자가 url에 입력한 파라미터 값을 출력하는 함수는 params를 사용한다.
+    console.log(요청.params);
+
+    // Objectid를 사용하려면 초기화를 해줘야하기 때문에 new를 사용해줘야한다.
+    // 3강 숙제, 파라미터 값을 던져서 detail.ejs에서 글 제목과 글 내용을 출력을 해주는 기능을 구현하세요.
+    // 요청.params.파라미터값을 작성해야, 해당 파라미터값을 잘받아온다.
+    // let result = await db.collection('post').findOne({ _id : new ObjectId(요청.params.id) })
+    // 응답.render('detail.ejs', { result : result })
+
+    // Part2 4강 상세페이지 만들기 (링크 만들기 + 예외처리)
+    try {
+    let result = await db.collection('post').findOne({ _id : new ObjectId(요청.params.id) })
+    if(result == null) {
+        응답.status(400).send("정상적인 접근이 아닙니다.");
+    }
+    응답.render('detail.ejs', { result : result })
+
+    } catch (e) {
+        console.log(e);
+        응답.status(400).send("정상적인 접근이 아닙니다.");
+    }
+});
+
+
+
+
+
+// ------------------------------------------------------------
